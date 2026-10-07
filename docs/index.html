@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ALDi Demo · Auxiliary Classification</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗣️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f8f7; --card: #ffffff; --text: #10201e; --muted: #5a6b68; --border: #dbe4e2;
+    --accent: #0f766e; --accent-soft: #d5f5ef; --on-accent: #ffffff; --code-bg: #eff4f3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b1211; --card: #121c1b; --text: #e5efed; --muted: #98aaa7; --border: #24342f;
+      --accent: #2dd4bf; --accent-soft: #123a35; --on-accent: #032320; --code-bg: #0e1816;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.55;
+         font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  a { color: var(--accent); font-weight: 600; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 32px 16px 48px; }
+
+  header h1 { font-size: clamp(1.45rem, 3.2vw, 2.1rem); line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.01em; }
+  header h2 { font-size: 1.05rem; font-weight: 500; color: var(--muted); margin: 0 0 14px; }
+  header p { margin: 0 0 16px; max-width: 780px; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px;
+           background: var(--accent-soft); font-size: .88rem; font-weight: 600; }
+
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin: 26px 0 20px; overflow-x: auto; }
+  .tab { background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 10px 14px;
+         font: inherit; font-weight: 600; color: var(--muted); cursor: pointer; white-space: nowrap; }
+  .tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; min-width: 0; }
+
+  label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: 8px; }
+  textarea { width: 100%; min-height: 128px; resize: vertical; padding: 12px 14px; border-radius: 10px;
+             border: 1px solid var(--border); background: var(--bg); color: var(--text);
+             font-family: Cairo, sans-serif; font-size: 1.12rem; }
+  textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .buttons { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 12px; }
+  .btn { font: inherit; font-weight: 600; padding: 11px; border-radius: 10px; cursor: pointer;
+         border: 1px solid var(--border); background: var(--card); color: var(--text); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .btn:disabled { opacity: .55; cursor: not-allowed; }
+  .examples { margin-top: 18px; }
+  .examples .lbl { font-size: .85rem; color: var(--muted); margin-bottom: 6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-family: Cairo, sans-serif; background: var(--bg); border: 1px solid var(--border); color: var(--text);
+          padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: .98rem; }
+  .chip:hover { border-color: var(--accent); }
+
+  .result { display: flex; flex-direction: column; justify-content: center; }
+  .bar { position: relative; height: 14px; border-radius: 7px; background: linear-gradient(90deg, #16a34a, #eab308, #dc2626); }
+  .marker { position: absolute; top: -6px; left: 0; width: 4px; height: 26px; border-radius: 2px;
+            background: var(--text); transform: translateX(-2px); transition: left .45s ease; }
+  .scale { display: flex; justify-content: space-between; font-size: .8rem; color: var(--muted); margin-top: 6px; }
+  .score { text-align: center; font-size: 2.9rem; font-weight: 700; margin-top: 18px; font-variant-numeric: tabular-nums; }
+  .score-label { text-align: center; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .verdict { text-align: center; font-weight: 600; margin-top: 6px; min-height: 1.6em; }
+  .status { margin-top: 20px; font-size: .86rem; color: var(--muted); }
+  .progress { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+  .progress > div { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+
+  .local { max-width: 860px; }
+  .note { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 8px; }
+  .step { display: flex; gap: 12px; align-items: flex-start; margin: 26px 0 8px; }
+  .num { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--on-accent);
+         display: grid; place-items: center; font-weight: 700; font-size: .9rem; }
+  .step-title { font-weight: 700; line-height: 28px; }
+  .step-desc { font-size: .9rem; color: var(--muted); }
+  pre { position: relative; margin: 0; padding: 14px 72px 14px 16px; overflow-x: auto; font-size: .87rem;
+        background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; }
+  .copy { position: absolute; top: 8px; right: 8px; font: inherit; font-size: .75rem; padding: 3px 9px; border-radius: 6px;
+          border: 1px solid var(--border); background: var(--card); color: var(--muted); cursor: pointer; }
+  footer { margin-top: 44px; font-size: .86rem; color: var(--muted); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>When Does Auxiliary Classification Help Regression in Practice?</h1>
+    <h2>A Case Study in Arabic Dialectness Modeling: interactive demo</h2>
+    <p>Estimates the <b>Arabic Level of Dialectness (ALDi)</b> of a sentence: a continuous score from 0 (Modern
+      Standard Arabic) to 1 (fully dialectal). Our multi-task AraBERT system is trained with an auxiliary 7-bin
+      classification head (Focal Loss); only the regression head is used at inference. It reaches a blind-test RMSE
+      of <b>0.1275</b> on NADI 2024 Subtask 2, a new state of the art (previous best 0.1403).</p>
+    <span class="badge">🖥️ The model is running on CPU, right here in your browser</span>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-panel="try">🔍 Try it</button>
+    <button class="tab" role="tab" aria-selected="false" data-panel="local">💻 Run on your machine</button>
+  </nav>
+
+  <section id="try" role="tabpanel">
+    <div class="grid">
+      <div class="card">
+        <label for="text">Arabic sentence</label>
+        <textarea id="text" dir="rtl" placeholder="اكتب جملة بالعربية هنا..."></textarea>
+        <div class="buttons">
+          <button class="btn" id="clear">Clear</button>
+          <button class="btn primary" id="analyze" disabled>Loading model…</button>
+        </div>
+        <div class="examples">
+          <div class="lbl">Examples from the paper (Table 5)</div>
+          <div class="chips" id="chips"></div>
+        </div>
+      </div>
+      <div class="card result">
+        <div class="bar"><div class="marker" id="marker"></div></div>
+        <div class="scale"><span>0 — MSA</span><span>1 — Fully dialectal</span></div>
+        <div class="score" id="score">–</div>
+        <div class="score-label">ALDi score</div>
+        <div class="verdict" id="verdict">Enter a sentence to begin</div>
+        <div class="status" id="status">
+          <span id="status-text">Downloading the model (first visit only)…</span>
+          <div class="progress"><div id="progress"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="local" role="tabpanel" class="local" hidden>
+    <div class="note"><b>Runs on CPU.</b> Like this page, the model runs on <b>CPU</b> on your computer unless you
+      have an NVIDIA GPU with CUDA set up. That's fine: it's a BERT-base model, so a sentence takes about 1–2 seconds
+      on a normal laptop. The script picks the GPU automatically if one is available.</div>
+
+    <div class="step"><span class="num">1</span><div><div class="step-title">Install the requirements</div>
+      <div class="step-desc">Python 3.9+ recommended.</div></div></div>
+    <pre><code>pip install torch transformers==4.39.3 huggingface_hub</code></pre>
+
+    <div class="step"><span class="num">2</span><div><div class="step-title">Download the model</div>
+      <div class="step-desc">About 540 MB (model plus scripts) from the
+        <a href="https://huggingface.co/asakr-ai/ALDi-Arabic-Dialectness-MTL" target="_blank" rel="noopener">model page</a>.</div></div></div>
+    <pre><code>hf download asakr-ai/ALDi-Arabic-Dialectness-MTL --exclude "onnx/*" --local-dir aldi
+cd aldi</code></pre>
+
+    <div class="step"><span class="num">3</span><div><div class="step-title">Score a single sentence</div>
+      <div class="step-desc">Prints the ALDi score (0 = MSA, 1 = fully dialectal).</div></div></div>
+    <pre><code>python predict.py --text "شو هالحكي يا زلمة"</code></pre>
+
+    <div class="step"><span class="num">4</span><div><div class="step-title">Score a whole file (batch)</div>
+      <div class="step-desc">Results are written to a CSV with a new <code>aldi_score</code> column.</div></div></div>
+    <pre><code># CSV/TSV with a "sentence" column, or a .txt file with one sentence per line
+python predict.py --input sentences.csv --output predictions.csv</code></pre>
+
+    <div class="step"><span class="num">5</span><div><div class="step-title">Use it from Python</div>
+      <div class="step-desc">Import the same functions in your own code.</div></div></div>
+    <pre><code>from predict import load_model, score
+
+tokenizer, model, device = load_model("mtl_model")
+print("Running on:", device)   # "cpu" unless you have a CUDA GPU
+
+sentences = ["هذا الكتاب رائع جدا", "شو هالحكي يا زلمة"]
+for sentence, s in zip(sentences, score(sentences, tokenizer, model, device)):
+    print(f"{s:.3f}  {sentence}")</code></pre>
+  </section>
+
+  <footer>
+    Model: <a href="https://huggingface.co/asakr-ai/ALDi-Arabic-Dialectness-MTL" target="_blank" rel="noopener">asakr-ai/ALDi-Arabic-Dialectness-MTL</a>
+    · Code: <a href="https://github.com/Body123/ALDi-Arabic-Dialectness-MTL" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</div>
+
+<script type="module">
+import { AutoTokenizer, env } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1";
+import * as ort from "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/ort.wasm.min.mjs";
+
+const REPO = "asakr-ai/ALDi-Arabic-Dialectness-MTL";
+const MODEL_URL = `https://huggingface.co/${REPO}/resolve/main/onnx/model.onnx`;
+const CACHE_NAME = "aldi-onnx-v1";
+const EXAMPLES = [
+  "يوم شفت الوقت الساعه تذكرت عندي ماده كنت بسحبها ونسيت",
+  "ممكن بواب قاعات كليتنا عقد ما بنمتحن",
+  "اهم شي عليه قرض",
+];
+
+env.allowLocalModels = false;
+env.remotePathTemplate = "{model}/resolve/{revision}/mtl_model/";
+ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/";
+ort.env.wasm.numThreads = self.crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 1) : 1;
+
+const $ = (id) => document.getElementById(id);
+const analyzeBtn = $("analyze");
+let tokenizer = null;
+let session = null;
+
+function verdictFor(s) {
+  if (s <= 0.05) return "Modern Standard Arabic";
+  if (s <= 0.35) return "Mostly MSA, slightly dialectal";
+  if (s <= 0.65) return "Mixed MSA / dialectal";
+  if (s <= 0.9) return "Mostly dialectal";
+  return "Fully dialectal";
+}
+
+function showScore(s) {
+  $("marker").style.left = `${s * 100}%`;
+  $("score").textContent = s.toFixed(3);
+  $("verdict").textContent = verdictFor(s);
+}
+
+function showMessage(msg) {
+  $("marker").style.left = "0%";
+  $("score").textContent = "–";
+  $("verdict").textContent = msg;
+}
+
+async function fetchModel(url, onProgress) {
+  let cache = null;
+  try {
+    cache = await caches.open(CACHE_NAME);
+    const hit = await cache.match(url);
+    if (hit) return new Uint8Array(await hit.arrayBuffer());
+  } catch { cache = null; }
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`model download failed (HTTP ${res.status})`);
+  const total = Number(res.headers.get("content-length")) || 0;
+  const reader = res.body.getReader();
+  const chunks = [];
+  let loaded = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    loaded += value.length;
+    onProgress(loaded, total);
+  }
+  const bytes = new Uint8Array(loaded);
+  let offset = 0;
+  for (const c of chunks) { bytes.set(c, offset); offset += c.length; }
+
+  try { if (cache) await cache.put(url, new Response(bytes)); } catch { /* storage full or unavailable */ }
+  return bytes;
+}
+
+async function init() {
+  const mb = (n) => (n / 1e6).toFixed(0);
+  try {
+    const [tok, bytes] = await Promise.all([
+      AutoTokenizer.from_pretrained(REPO),
+      fetchModel(MODEL_URL, (loaded, total) => {
+        $("status-text").textContent = total
+          ? `Downloading the model (first visit only): ${mb(loaded)} / ${mb(total)} MB`
+          : `Downloading the model (first visit only): ${mb(loaded)} MB`;
+        if (total) $("progress").style.width = `${(100 * loaded) / total}%`;
+      }),
+    ]);
+    tokenizer = tok;
+    $("status-text").textContent = "Preparing the model…";
+    $("progress").style.width = "100%";
+    session = await ort.InferenceSession.create(bytes, { executionProviders: ["wasm"] });
+    $("status").hidden = true;
+    analyzeBtn.disabled = false;
+    analyzeBtn.textContent = "Analyze";
+  } catch (err) {
+    console.error(err);
+    $("status-text").textContent = `Could not load the model (${err.message}). Please reload the page.`;
+    analyzeBtn.textContent = "Model unavailable";
+  }
+}
+
+async function analyze() {
+  if (!session) return;
+  const text = $("text").value.trim();
+  if (!text) { showMessage("Enter a sentence above"); return; }
+  analyzeBtn.disabled = true;
+  analyzeBtn.textContent = "Analyzing…";
+  try {
+    const enc = tokenizer(text, { truncation: true, max_length: 256 });
+    const dims = enc.input_ids.dims;
+    const out = await session.run({
+      input_ids: new ort.Tensor("int64", enc.input_ids.data, dims),
+      attention_mask: new ort.Tensor("int64", enc.attention_mask.data, dims),
+    });
+    showScore(Math.min(1, Math.max(0, Number(out.aldi.data[0]))));
+  } catch (err) {
+    console.error(err);
+    showMessage(`Something went wrong: ${err.message}`);
+  } finally {
+    analyzeBtn.disabled = false;
+    analyzeBtn.textContent = "Analyze";
+  }
+}
+
+for (const ex of EXAMPLES) {
+  const chip = document.createElement("button");
+  chip.className = "chip";
+  chip.dir = "rtl";
+  chip.textContent = ex;
+  chip.addEventListener("click", () => { $("text").value = ex; analyze(); });
+  $("chips").append(chip);
+}
+
+analyzeBtn.addEventListener("click", analyze);
+$("clear").addEventListener("click", () => { $("text").value = ""; showMessage("Enter a sentence to begin"); $("text").focus(); });
+$("text").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) analyze(); });
+
+for (const tab of document.querySelectorAll(".tab")) {
+  tab.addEventListener("click", () => {
+    for (const t of document.querySelectorAll(".tab")) {
+      const selected = t === tab;
+      t.setAttribute("aria-selected", String(selected));
+      $(t.dataset.panel).hidden = !selected;
+    }
+  });
+}
+
+for (const pre of document.querySelectorAll("pre")) {
+  const btn = document.createElement("button");
+  btn.className = "copy";
+  btn.textContent = "Copy";
+  btn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(pre.querySelector("code").innerText);
+      btn.textContent = "Copied";
+    } catch { btn.textContent = "Select & copy"; }
+    setTimeout(() => (btn.textContent = "Copy"), 1500);
+  });
+  pre.append(btn);
+}
+
+init();
+</script>
+</body>
+</html>

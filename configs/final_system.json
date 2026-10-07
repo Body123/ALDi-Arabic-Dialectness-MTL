@@ -1,0 +1,34 @@
+{
+  "model_name": "aubmindlab/bert-base-arabertv02-twitter",
+
+  "num_classes": 7,
+  "binning_strategy": "cut",
+  "loss_type": "focal",
+  "focal_loss_gamma": 3,
+  "regression_loss_type": "mse",
+  "alpha": 0.73,
+
+  "use_dynamic_alpha": false,
+  "alpha_initial": 0.25,
+  "alpha_final": 0.75,
+  "dynamic_alpha_switch_epoch": 4,
+
+  "head_dropout": 0.25,
+  "head_hidden_layers": [],
+  "prelu_init": 0.1,
+
+  "max_len": 256,
+  "batch_size": 32,
+  "epochs": 5,
+  "learning_rate": 4e-06,
+  "lr_scheduler_type": "polynomial",
+  "warmup_steps": 500,
+  "weight_decay": 0.01,
+  "max_grad_norm": 1.0,
+  "eval_steps": 750,
+  "save_steps": 750,
+  "save_total_limit": 2,
+
+  "n_splits": 5,
+  "random_state": 42
+}

@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# training outputs, checkpoints and local data (data is not redistributed)
+runs/
+data/
+predictions.csv
