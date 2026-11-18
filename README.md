@@ -4,7 +4,7 @@ Abdelrahman Sakr, Marwan Torki, and Nagwa El-Makky. Computer and Systems Enginee
 
 🔍 [**Live demo**](https://huggingface.co/spaces/asakr-ai/aldi-dialectness-demo) ·
 🤗 [**Model**](https://huggingface.co/asakr-ai/ALDi-Arabic-Dialectness-MTL) ·
-📄 Paper: {put paper link here}
+📄 [**Paper**](https://aclanthology.org/2026.emnlp-main.30/)
 
 This repository estimates the **Arabic Level of Dialectness (ALDi)** of a sentence: a continuous score from
 **0** (Modern Standard Arabic) to **1** (fully dialectal). A shared AraBERTv2-Twitter encoder is trained jointly on
@@ -149,6 +149,18 @@ served at `https://body123.github.io/ALDi-Arabic-Dialectness-MTL/`.
 
 ## Citation
 
-```bibtex
-{put citation here}
-```
+@inproceedings{sakr-etal-2026-auxiliary,
+    title = "When Does Auxiliary Classification Help Regression in Practice? A Case Study in {A}rabic Dialectness Modeling",
+    author = "Sakr, Abdelrahman  and
+      Torki, Marwan  and
+      El-Makky, Nagwa",
+    booktitle = "Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing",
+    month = oct,
+    year = "2026",
+    address = "Budapest, Hungary",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2026.emnlp-main.30/",
+    doi = "10.18653/2026.emnlp-main.30",
+    pages = "639--649"
+}
+
