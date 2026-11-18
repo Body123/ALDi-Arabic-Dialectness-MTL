@@ -149,6 +149,7 @@ served at `https://body123.github.io/ALDi-Arabic-Dialectness-MTL/`.
 
 ## Citation
 
+```bibtex
 @inproceedings{sakr-etal-2026-auxiliary,
     title = "When Does Auxiliary Classification Help Regression in Practice? A Case Study in {A}rabic Dialectness Modeling",
     author = "Sakr, Abdelrahman  and
@@ -163,4 +164,4 @@ served at `https://body123.github.io/ALDi-Arabic-Dialectness-MTL/`.
     doi = "10.18653/2026.emnlp-main.30",
     pages = "639--649"
 }
-
+```
